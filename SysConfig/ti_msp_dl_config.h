@@ -87,14 +87,15 @@ extern "C" {
 #define I2C_MPU6050_INST                                                    I2C0
 #define I2C_MPU6050_INST_IRQHandler                              I2C0_IRQHandler
 #define I2C_MPU6050_INST_INT_IRQN                                  I2C0_INT_IRQn
+#define I2C_MPU6050_BUS_SPEED_HZ                                          400000
 #define GPIO_I2C_MPU6050_SDA_PORT                                          GPIOA
-#define GPIO_I2C_MPU6050_SDA_PIN                                  DL_GPIO_PIN_28
-#define GPIO_I2C_MPU6050_IOMUX_SDA                                (IOMUX_PINCM3)
-#define GPIO_I2C_MPU6050_IOMUX_SDA_FUNC                 IOMUX_PINCM3_PF_I2C0_SDA
+#define GPIO_I2C_MPU6050_SDA_PIN                                  DL_GPIO_PIN_10
+#define GPIO_I2C_MPU6050_IOMUX_SDA                               (IOMUX_PINCM21)
+#define GPIO_I2C_MPU6050_IOMUX_SDA_FUNC                IOMUX_PINCM21_PF_I2C0_SDA
 #define GPIO_I2C_MPU6050_SCL_PORT                                          GPIOA
-#define GPIO_I2C_MPU6050_SCL_PIN                                   DL_GPIO_PIN_1
-#define GPIO_I2C_MPU6050_IOMUX_SCL                                (IOMUX_PINCM2)
-#define GPIO_I2C_MPU6050_IOMUX_SCL_FUNC                 IOMUX_PINCM2_PF_I2C0_SCL
+#define GPIO_I2C_MPU6050_SCL_PIN                                  DL_GPIO_PIN_11
+#define GPIO_I2C_MPU6050_IOMUX_SCL                               (IOMUX_PINCM22)
+#define GPIO_I2C_MPU6050_IOMUX_SCL_FUNC                IOMUX_PINCM22_PF_I2C0_SCL
 
 
 /* Defines for UART0 */
@@ -104,12 +105,12 @@ extern "C" {
 #define UART0_INST_INT_IRQN                                       UART0_INT_IRQn
 #define GPIO_UART0_RX_PORT                                                 GPIOA
 #define GPIO_UART0_TX_PORT                                                 GPIOA
-#define GPIO_UART0_RX_PIN                                         DL_GPIO_PIN_11
-#define GPIO_UART0_TX_PIN                                         DL_GPIO_PIN_10
-#define GPIO_UART0_IOMUX_RX                                      (IOMUX_PINCM22)
-#define GPIO_UART0_IOMUX_TX                                      (IOMUX_PINCM21)
-#define GPIO_UART0_IOMUX_RX_FUNC                       IOMUX_PINCM22_PF_UART0_RX
-#define GPIO_UART0_IOMUX_TX_FUNC                       IOMUX_PINCM21_PF_UART0_TX
+#define GPIO_UART0_RX_PIN                                          DL_GPIO_PIN_1
+#define GPIO_UART0_TX_PIN                                          DL_GPIO_PIN_0
+#define GPIO_UART0_IOMUX_RX                                       (IOMUX_PINCM2)
+#define GPIO_UART0_IOMUX_TX                                       (IOMUX_PINCM1)
+#define GPIO_UART0_IOMUX_RX_FUNC                        IOMUX_PINCM2_PF_UART0_RX
+#define GPIO_UART0_IOMUX_TX_FUNC                        IOMUX_PINCM1_PF_UART0_TX
 #define UART0_BAUD_RATE                                                 (115200)
 #define UART0_IBRD_40_MHZ_115200_BAUD                                       (21)
 #define UART0_FBRD_40_MHZ_115200_BAUD                                       (45)
@@ -121,15 +122,15 @@ extern "C" {
 /* Port definition for Pin Group PORTA */
 #define PORTA_PORT                                                       (GPIOA)
 
-/* Defines for LED_USER: GPIOA.0 with pinCMx 1 on package pin 33 */
-#define PORTA_LED_USER_PIN                                       (DL_GPIO_PIN_0)
-#define PORTA_LED_USER_IOMUX                                      (IOMUX_PINCM1)
+/* Defines for LED_USER: GPIOA.4 with pinCMx 9 on package pin 44 */
+#define PORTA_LED_USER_PIN                                       (DL_GPIO_PIN_4)
+#define PORTA_LED_USER_IOMUX                                      (IOMUX_PINCM9)
 /* Port definition for Pin Group GPIO_LED */
 #define GPIO_LED_PORT                                                    (GPIOB)
 
-/* Defines for PIN_LED: GPIOB.14 with pinCMx 31 on package pin 2 */
-#define GPIO_LED_PIN_LED_PIN                                    (DL_GPIO_PIN_14)
-#define GPIO_LED_PIN_LED_IOMUX                                   (IOMUX_PINCM31)
+/* Defines for PIN_LED: GPIOB.22 with pinCMx 50 on package pin 21 */
+#define GPIO_LED_PIN_LED_PIN                                    (DL_GPIO_PIN_22)
+#define GPIO_LED_PIN_LED_IOMUX                                   (IOMUX_PINCM50)
 
 
 

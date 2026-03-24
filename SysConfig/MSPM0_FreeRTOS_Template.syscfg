@@ -62,15 +62,20 @@ GPIO1.$name                                 = "PORTA";
 GPIO1.port                                  = "PORTA";
 GPIO1.associatedPins[0].$name               = "LED_USER";
 GPIO1.associatedPins[0].assignedPortSegment = "Lower";
-GPIO1.associatedPins[0].assignedPin         = "0";
 GPIO1.associatedPins[0].initialValue        = "SET";
+GPIO1.associatedPins[0].assignedPin         = "4";
+GPIO1.associatedPins[0].pin.$assign         = "j17_expansion.3";
 
 GPIO2.$name                         = "GPIO_LED";
 GPIO2.port                          = "PORTB";
-GPIO2.associatedPins[0].assignedPin = "14";
 GPIO2.associatedPins[0].$name       = "PIN_LED";
+GPIO2.associatedPins[0].assignedPin = "22";
 
 I2C1.$name                             = "I2C_MPU6050";
+I2C1.basicEnableController             = true;
+I2C1.basicControllerStandardBusSpeed   = "Fast";
+I2C1.peripheral.sdaPin.$assign         = "boosterpack.34";
+I2C1.peripheral.sclPin.$assign         = "boosterpack.33";
 I2C1.sdaPinConfig.hideOutputInversion  = scripting.forceWrite(false);
 I2C1.sdaPinConfig.onlyInternalResistor = scripting.forceWrite(false);
 I2C1.sdaPinConfig.passedPeripheralType = scripting.forceWrite("Digital");
@@ -97,8 +102,8 @@ UART1.$name                            = "UART0";
 UART1.enableFIFO                       = true;
 UART1.targetBaudRate                   = 115200;
 UART1.peripheral.$assign               = "UART0";
-UART1.peripheral.rxPin.$assign         = "boosterpack.33";
-UART1.peripheral.txPin.$assign         = "boosterpack.34";
+UART1.peripheral.rxPin.$assign         = "j17_expansion.9";
+UART1.peripheral.txPin.$assign         = "j19_expansion.9";
 UART1.txPinConfig.direction            = scripting.forceWrite("OUTPUT");
 UART1.txPinConfig.hideOutputInversion  = scripting.forceWrite(false);
 UART1.txPinConfig.onlyInternalResistor = scripting.forceWrite(false);
@@ -117,8 +122,5 @@ ProjectConfig.migrationCondition = true;
  * version of the tool will not impact the pinmux you originally saw.  These lines can be completely deleted in order to
  * re-solve from scratch.
  */
-GPIO1.associatedPins[0].pin.$suggestSolution = "j19_expansion.9";
-GPIO2.associatedPins[0].pin.$suggestSolution = "j21_expansion.3";
+GPIO2.associatedPins[0].pin.$suggestSolution = "j19_expansion.5";
 I2C1.peripheral.$suggestSolution             = "I2C0";
-I2C1.peripheral.sdaPin.$suggestSolution      = "boosterpack.38";
-I2C1.peripheral.sclPin.$suggestSolution      = "j17_expansion.9";

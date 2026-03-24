@@ -9,6 +9,7 @@ include_directories(
     ./FreeRTOS/portable/GCC/ARM_CM0/
     ./BSP
     ./Board
+    ./Modules/MPU6050
 )
 
 file(GLOB_RECURSE C_SOURCES "./Sources/*.c")
@@ -17,6 +18,7 @@ file(GLOB FREERTOS_MEMMANG_C_SOURCES "./FreeRTOS/portable/MemMang/heap_4.c")
 file(GLOB_RECURSE FREERTOS_PORTABLE_C_SOURCES "./FreeRTOS/portable/GCC/ARM_CM0/*.c")
 file(GLOB_RECURSE BSP_SOURCES "./BSP/*.c")  # 添加BSP源文件
 file(GLOB_RECURSE Board_SOURCES "./Board/*.c")  # 添加BSP源文件
+file(GLOB_RECURSE MODULES_SOURCES "./Modules/*.c")  # 添加Modules源文件
 
 add_executable(${CMAKE_PROJECT_NAME}.elf
     ${SYSCONFIG_SOURCES}
@@ -26,6 +28,7 @@ add_executable(${CMAKE_PROJECT_NAME}.elf
     ${FREERTOS_PORTABLE_C_SOURCES}
     ${FREERTOS_MEMMANG_C_SOURCES}
     ${C_SOURCES}
-    ${BSP_SOURCES}  
-    ${Board_SOURCES}  
+    ${BSP_SOURCES}
+    ${Board_SOURCES}
+    ${MODULES_SOURCES}
 )

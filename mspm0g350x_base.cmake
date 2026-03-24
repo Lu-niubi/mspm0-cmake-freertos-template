@@ -22,13 +22,17 @@ endif ()
 #######################
 # set(CMAKE_C_COMPILER_FORCED ON)
 # set(CMAKE_CXX_COMPILER_FORCED ON)
-set(CMAKE_C_COMPILER arm-none-eabi-gcc)
-set(CMAKE_CXX_COMPILER arm-none-eabi-g++)
-set(CMAKE_ASM_COMPILER arm-none-eabi-gcc)
-set(CMAKE_AR arm-none-eabi-ar)
-set(CMAKE_OBJCOPY arm-none-eabi-objcopy)
-set(CMAKE_OBJDUMP arm-none-eabi-objdump)
-set(CMAKE_SIZE arm-none-eabi-size)
+
+# ARM 官方工具链路径（改成你的实际安装路径）
+set(ARM_TOOLCHAIN_PATH "C:/Users/Lu/pathforvscode/armtoolchain/bin")
+
+set(CMAKE_C_COMPILER   "${ARM_TOOLCHAIN_PATH}/arm-none-eabi-gcc.exe")
+set(CMAKE_CXX_COMPILER "${ARM_TOOLCHAIN_PATH}/arm-none-eabi-g++.exe")
+set(CMAKE_ASM_COMPILER "${ARM_TOOLCHAIN_PATH}/arm-none-eabi-gcc.exe")
+set(CMAKE_AR           "${ARM_TOOLCHAIN_PATH}/arm-none-eabi-ar.exe")
+set(CMAKE_OBJCOPY      "${ARM_TOOLCHAIN_PATH}/arm-none-eabi-objcopy.exe")
+set(CMAKE_OBJDUMP      "${ARM_TOOLCHAIN_PATH}/arm-none-eabi-objdump.exe")
+set(CMAKE_SIZE         "${ARM_TOOLCHAIN_PATH}/arm-none-eabi-size.exe")
 set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
 
 #######################
@@ -76,7 +80,7 @@ link_directories(${MSPM0_SDK_PATH}/source)
 add_link_options(-T${SYSCONFIG_PATH}/device_linker.lds)
 add_link_options(-T${SYSCONFIG_PATH}/device.lds.genlibs)
 add_link_options(-Wl,-gc-sections,--print-memory-usage,-Map=memory.map)  # 打印内存使用情况,生成map文件
-add_link_options(-mcpu=cortex-m0plus -march=armv6-m -mthumb -static -lgcc -lc -lm -lnosys --specs=nano.specs -nostartfiles) # 复制自m0 gcc例程的makefile
+add_link_options(-mcpu=cortex-m0plus -march=armv6-m -mthumb -static --specs=nano.specs --specs=nosys.specs -u _printf_float -Wl,--start-group -lgcc -lc -lm -Wl,--end-group -nostartfiles) # 复制自m0 gcc例程的makefile
 
 file(GLOB_RECURSE MSPM0_SDK_SOURCES
     ${MSPM0_SDK_PATH}/source/ti/driverlib/*.c
