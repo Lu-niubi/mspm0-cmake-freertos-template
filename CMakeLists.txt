@@ -10,6 +10,8 @@ include_directories(
     ./BSP
     ./Board
     ./Modules/MPU6050
+    ./Modules/Tracking
+    ./Modules/PID
 )
 
 file(GLOB_RECURSE C_SOURCES "./Sources/*.c")
