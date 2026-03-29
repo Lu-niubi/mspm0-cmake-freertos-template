@@ -14,6 +14,7 @@ typedef struct {
 extern QueueHandle_t xMotorSpeedQueue;
 extern Speed_PID_Controller gMotorLeftPID;
 extern Speed_PID_Controller gMotorRightPID;
+extern float g_base_speed;   // 基础速度（m/s），可运行时修改
 
 // 创建编码器、PWM、PID、任务和队列，在 vTaskStartScheduler() 前调用
 void Motor_TaskInit(void);
@@ -21,3 +22,4 @@ void Motor_TaskInit(void);
 void motorTask(void *pvParameters);
 
 #endif // MOTOR_TASK_H
+

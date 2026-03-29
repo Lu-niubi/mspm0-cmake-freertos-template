@@ -13,6 +13,7 @@ include_directories(
     ./Modules/Tracking
     ./Modules/PID
     ./Modules/Motor
+    ./Modules/Button
 )
 
 file(GLOB_RECURSE C_SOURCES "./Sources/*.c")
