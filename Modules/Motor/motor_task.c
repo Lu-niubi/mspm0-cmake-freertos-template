@@ -27,7 +27,7 @@ static float ramp_duty(float current, float target)
 typedef enum {
     MOTOR_STATE_IDLE,           // 等待按键
     MOTOR_STATE_TRACKING,       // 正常循迹
-    MOTOR_STATE_LOST_STRAIGHT,  // 丢线后直行 2.5 秒
+    MOTOR_STATE_LOST_STRAIGHT,  // 丢线后直行 0.3 秒
     MOTOR_STATE_LOST_TURN,      // 直行结束后原地左转（右轮转左轮停）
     MOTOR_STATE_STOPPED,        // 完成指定圈数，停止
 } MotorState_t;
@@ -115,7 +115,7 @@ void motorTask(void *pvParameters)
             {
                 // 直行 2.5 秒
                 uint32_t elapsed = xTaskGetTickCount() - state_ticks;
-                if (elapsed >= pdMS_TO_TICKS(2000)) {
+                if (elapsed >= pdMS_TO_TICKS(300)) {
                     state = MOTOR_STATE_LOST_TURN;
                     state_ticks = xTaskGetTickCount();
                     break;
