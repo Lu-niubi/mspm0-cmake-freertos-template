@@ -12,6 +12,7 @@ include_directories(
     ./Modules/MPU6050
     ./Modules/Tracking
     ./Modules/PID
+    ./Modules/Motor
 )
 
 file(GLOB_RECURSE C_SOURCES "./Sources/*.c")

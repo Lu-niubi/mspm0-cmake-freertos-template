@@ -3,7 +3,7 @@
  * via the GUI or CLI. Run CLI with '--help' for additional information on how to override these arguments.
  * @cliArgs --board "/ti/boards/LP_MSPM0G3507" --product "mspm0_sdk@2.05.01.00"
  * @v2CliArgs --board "/ti/boards/LP_MSPM0G3507" --product "mspm0_sdk@2.05.01.00"
- * @versions {"tool":"1.24.2+4234"}
+ * @versions {"tool":"1.24.1+4189"}
  */
 scripting.excludeFromBuild("device_linker.lds");
 
@@ -101,7 +101,7 @@ GPIO3.associatedPins[6].direction   = "INPUT";
 GPIO3.associatedPins[6].pin.$assign = "boosterpack.23";
 GPIO3.associatedPins[7].$name       = "R1";
 GPIO3.associatedPins[7].direction   = "INPUT";
-GPIO3.associatedPins[7].pin.$assign = "boosterpack.26";
+GPIO3.associatedPins[7].pin.$assign = "j21_expansion.3";
 
 GPIO4.$name                               = "GPIO_Encoder";
 GPIO4.associatedPins.create(4);
@@ -155,7 +155,6 @@ PWM1.pwmMode                    = "EDGE_ALIGN_UP";
 PWM1.peripheral.ccp0Pin.$assign = "boosterpack.40";
 PWM1.peripheral.ccp1Pin.$assign = "boosterpack.39";
 PWM1.PWM_CHANNEL_0.$name        = "ti_driverlib_pwm_PWMTimerCC0";
-PWM1.PWM_CHANNEL_0.ccValue      = 0;
 PWM1.PWM_CHANNEL_1.$name        = "ti_driverlib_pwm_PWMTimerCC1";
 PWM1.ccp0PinConfig.$name        = "ti_driverlib_gpio_GPIOPinGeneric4";
 PWM1.ccp1PinConfig.$name        = "ti_driverlib_gpio_GPIOPinGeneric5";

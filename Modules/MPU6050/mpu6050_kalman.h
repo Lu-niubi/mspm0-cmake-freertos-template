@@ -98,5 +98,6 @@ float KalmanFilter_Update(MPU6050_KalmanFilter *kf, float measurement);
 void MPU6050_SoftCalibrate_Z(void);
 uint8_t MPU6050_Read_REG(uint8_t reg);
 void MPU6050_Write_REG(uint8_t reg, uint8_t data);
+float mpu_fabsf(float x);
 
 #endif // MPU6050_KALMAN_H

@@ -179,10 +179,10 @@ extern "C" {
 #define Tracking_R2_PORT                                                 (GPIOB)
 #define Tracking_R2_PIN                                         (DL_GPIO_PIN_19)
 #define Tracking_R2_IOMUX                                        (IOMUX_PINCM45)
-/* Defines for R1: GPIOA.18 with pinCMx 40 on package pin 11 */
-#define Tracking_R1_PORT                                                 (GPIOA)
-#define Tracking_R1_PIN                                         (DL_GPIO_PIN_18)
-#define Tracking_R1_IOMUX                                        (IOMUX_PINCM40)
+/* Defines for R1: GPIOB.14 with pinCMx 31 on package pin 2 */
+#define Tracking_R1_PORT                                                 (GPIOB)
+#define Tracking_R1_PIN                                         (DL_GPIO_PIN_14)
+#define Tracking_R1_IOMUX                                        (IOMUX_PINCM31)
 /* Port definition for Pin Group GPIO_Encoder */
 #define GPIO_Encoder_PORT                                                (GPIOA)
 

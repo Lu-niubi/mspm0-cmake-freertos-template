@@ -12,7 +12,7 @@ static float current_yaw = 0.0f;
 /* ---------------------------------------------------------------
  * Cortex-M0+ 纯 C 数学库 (针对没有 FPU 优化)
  * --------------------------------------------------------------- */
-static float mpu_fabsf(float x) { return (x < 0.0f) ? -x : x; }
+float mpu_fabsf(float x) { return (x < 0.0f) ? -x : x; }
 
 static float mpu_sqrtf(float x) {
     if (x <= 0.0f) return 0.0f;

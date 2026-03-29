@@ -101,9 +101,12 @@ float Steering_PID_Compute(Steering_PID_Controller* pid, float target, float act
     float raw_output = P + I + D;
 
     // 输出限幅
-    if (raw_output > pid->output_limit) {
+    if (raw_output > pid->output_limit) 
+    {
         raw_output = pid->output_limit;
-    } else if (raw_output < -pid->output_limit) {
+    } 
+    else if (raw_output < -pid->output_limit) 
+    {
         raw_output = -pid->output_limit;
     }
 
