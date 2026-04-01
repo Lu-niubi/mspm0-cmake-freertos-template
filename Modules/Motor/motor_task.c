@@ -5,13 +5,15 @@
 #include "button.h"
 #include "task.h"
 #include "queue.h"
+#include <math.h>
 #include <stdio.h>
 
 QueueHandle_t xMotorSpeedQueue = NULL;
 Speed_PID_Controller gMotorLeftPID;
 Speed_PID_Controller gMotorRightPID;
 
-float g_base_speed = 1.0f;
+float g_base_speed = 1.2f;
+static float my_fabsf(float x) { return (x < 0.0f) ? -x : x; }
 
 /* ---- 辅助：向 oledTask 发送显示消息 ---- */
 static void oled_post_select(uint8_t laps)
@@ -44,6 +46,7 @@ typedef enum {
     MOTOR_STATE_TRACKING,
     MOTOR_STATE_LOST_STRAIGHT,
     MOTOR_STATE_LOST_TURN,
+    MOTOR_STATE_LOST_CENTERING,  /* 找到线后对中，直到误差足够小再恢复循迹 */
     MOTOR_STATE_STOPPED,
 } MotorState_t;
 
@@ -88,8 +91,8 @@ void motorTask(void *pvParameters)
                 Motor_Stop();
                 out_l = 0.0f;
                 out_r = 0.0f;
-                Speed_PID_Init(&gMotorLeftPID,  600.0f, 150.0f, 0.0f, 800.0f, 0.8f);
-                Speed_PID_Init(&gMotorRightPID, 600.0f, 150.0f, 0.0f, 800.0f, 0.8f);
+                Speed_PID_Init(&gMotorLeftPID,  450.0f, 150.0f, 0.0f, 800.0f, 0.8f);
+                Speed_PID_Init(&gMotorRightPID, 450.0f, 150.0f, 0.0f, 800.0f, 0.8f);
 
                 bool need_refresh = false;
                 if (btn.a26_edge)
@@ -142,7 +145,7 @@ void motorTask(void *pvParameters)
                     TickType_t now = xTaskGetTickCount();
                     uint32_t since_last = (uint32_t)(now - last_lost_ticks);
                     if (since_last < pdMS_TO_TICKS(lost_debounce_ms)) {
-                        /* 距上次丢线不足2秒，忽略，继续循迹 */
+                        /* 距上次丢线不足3秒，忽略，继续循迹 */
                         duty_l = Speed_PID_Compute(&gMotorLeftPID,  g_base_speed, g_encoder_left.speed_mps,  dt);
                         duty_r = Speed_PID_Compute(&gMotorRightPID, g_base_speed, g_encoder_right.speed_mps, dt);
                         break;
@@ -175,7 +178,7 @@ void motorTask(void *pvParameters)
             case MOTOR_STATE_LOST_STRAIGHT:
             {
                 uint32_t elapsed = xTaskGetTickCount() - state_ticks;
-                if (elapsed >= pdMS_TO_TICKS(100)) {
+                if (elapsed >= pdMS_TO_TICKS(150)) {
                     state = MOTOR_STATE_LOST_TURN;
                     state_ticks = xTaskGetTickCount();
                     break;
@@ -187,16 +190,27 @@ void motorTask(void *pvParameters)
 
             case MOTOR_STATE_LOST_TURN:
             {
-                if (line_found) {
+                /* 找到线且误差足够小（接近中心）才切回正常循迹 */
+                if (line_found && my_fabsf(track_result.track_error) < 2.5f) {
                     state = MOTOR_STATE_TRACKING;
                     break;
                 }
+                /* 无论是否找到线，一直保持原地转弯直到对中 */
+                /* 转弯速度用 base_speed 的一半，避免冲过头 */
+                const float turn_speed = g_base_speed * 0.5f;
                 out_r = 0.0f;
                 Motor_SetPWM(1, 0.0f);
 
-                out_l = Speed_PID_Compute(&gMotorRightPID, g_base_speed, g_encoder_left.speed_mps, dt);
+                out_l = Speed_PID_Compute(&gMotorRightPID, turn_speed, g_encoder_left.speed_mps, dt);
                 Motor_SetPWM(0, out_l);
                 goto skip_output;
+            }
+
+            case MOTOR_STATE_LOST_CENTERING:
+            {
+                /* 此状态已合并到 MOTOR_STATE_LOST_TURN，不再使用 */
+                state = MOTOR_STATE_LOST_TURN;
+                break;
             }
 
             case MOTOR_STATE_STOPPED:
@@ -232,8 +246,8 @@ void Motor_TaskInit(void)
     Encoder_Init();
     Motor_DriverInit();
 
-    Speed_PID_Init(&gMotorLeftPID,  600.0f, 150.0f, 0.0f, 800.0f, 0.8f);
-    Speed_PID_Init(&gMotorRightPID, 600.0f, 150.0f, 0.0f, 800.0f, 0.8f);
+    Speed_PID_Init(&gMotorLeftPID,  450.0f, 150.0f, 0.0f, 800.0f, 0.8f);
+    Speed_PID_Init(&gMotorRightPID, 450.0f, 150.0f, 0.0f, 800.0f, 0.8f);
 
     xMotorSpeedQueue = xQueueCreate(1, sizeof(MotorSpeed_t));
 

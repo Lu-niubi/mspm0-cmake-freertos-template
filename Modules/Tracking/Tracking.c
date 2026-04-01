@@ -4,10 +4,14 @@
 #include <ti/driverlib/driverlib.h>
 #include "ti_msp_dl_config.h"
 
-// 传感器位置权重（单位：cm）- 匹配物理布局
+static float my_fabsf(float x) { return (x < 0.0f) ? -x : x; }
+
+// 传感器位置权重 - 物理布局从左到右: L1(最外) L2 L3 L4(最内) | R4(最内) R3 R2 R1(最外)
+// pattern bit顺序: bit7=L4, bit6=L3, bit5=L2, bit4=L1, bit3=R1, bit2=R2, bit1=R3, bit0=R4
+// L4/R4在中间→权重小(±1)，L1/R1在外侧→权重大(±4)
 const float SENSOR_POSITIONS[8] = {
-    -3.5f, -2.5f, -1.5f, -0.5f,  // L4, L3, L2, L1
-    +0.5f, +1.5f, +2.5f, +3.5f   // R1, R2, R3, R4
+    -1.0f, -2.0f, -3.0f, -4.0f,  // L4(bit7), L3(bit6), L2(bit5), L1(bit4)
+    +4.0f, +3.0f, +2.0f, +1.0f   // R1(bit3), R2(bit2), R3(bit1), R4(bit0)
 };
 
 void Track_ReadSensors(TrackSensorData *data)
@@ -42,8 +46,8 @@ TrackResult CalculateTrackResult(TrackSensorData *data) {
         (data->R3 << 1) |  // R3 (bit1)
         data->R4;          // R4 (bit0)
 
-    // 中心模式检测（L1和R1同时检测）
-    const uint8_t CENTER_PATTERN = 0x18; // 二进制:00011000
+    // 中心模式检测（L4和R4同时检测，它们是最靠近中间的传感器）
+    const uint8_t CENTER_PATTERN = 0x81; // 二进制:10000001 = L4(bit7)+R4(bit0)
 
     if (pattern == CENTER_PATTERN) {
         result.state = TRACK_CENTER;
@@ -66,7 +70,7 @@ TrackResult CalculateTrackResult(TrackSensorData *data) {
             result.line_position = weighted_sum / active_count;
 
             // 确定跟踪状态
-            if (fabsf(result.line_position) < 0.1f) {
+            if (my_fabsf(result.line_position) < 0.1f) {
                 result.state = TRACK_CENTER;
             } else {
                 result.state = (result.line_position < 0) ? TRACK_LEFT : TRACK_RIGHT;
