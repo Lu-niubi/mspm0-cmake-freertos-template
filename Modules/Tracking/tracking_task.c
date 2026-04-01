@@ -16,7 +16,7 @@ void trackingTask(void *pvParameters)
 
     // 初始化转向PID控制器
     // 参数：Kp, Ki, Kd, output_limit, filter_alpha
-    Steering_PID_Init(&gSteeringPID, 0.02f, 0.0f, 0.0f, 0.2f, 0.9f);
+    Steering_PID_Init(&gSteeringPID, 0.03f, 0.0f, 0.0f, 0.2f, 0.9f);
 
     TickType_t xLastWakeTime = xTaskGetTickCount();
     const TickType_t xFrequency = pdMS_TO_TICKS(10);

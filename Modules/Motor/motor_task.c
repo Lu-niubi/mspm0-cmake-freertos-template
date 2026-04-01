@@ -11,7 +11,7 @@ QueueHandle_t xMotorSpeedQueue = NULL;
 Speed_PID_Controller gMotorLeftPID;
 Speed_PID_Controller gMotorRightPID;
 
-float g_base_speed = 1.2f;
+float g_base_speed = 1.0f;
 
 /* ---- 辅助：向 oledTask 发送显示消息 ---- */
 static void oled_post_select(uint8_t laps)
@@ -57,6 +57,8 @@ void motorTask(void *pvParameters)
     uint8_t lost_limit     = 4;
     uint8_t selected_laps  = 1;
     uint32_t state_ticks   = 0;
+    TickType_t last_lost_ticks = 0;          /* 上次确认丢线的时刻 */
+    const uint32_t lost_debounce_ms = 3000;  /* 两次丢线最小间隔 */
     const float dt = 0.02f;
 
     float out_l = 0.0f;
@@ -137,6 +139,15 @@ void motorTask(void *pvParameters)
             case MOTOR_STATE_TRACKING:
             {
                 if (!line_found) {
+                    TickType_t now = xTaskGetTickCount();
+                    uint32_t since_last = (uint32_t)(now - last_lost_ticks);
+                    if (since_last < pdMS_TO_TICKS(lost_debounce_ms)) {
+                        /* 距上次丢线不足2秒，忽略，继续循迹 */
+                        duty_l = Speed_PID_Compute(&gMotorLeftPID,  g_base_speed, g_encoder_left.speed_mps,  dt);
+                        duty_r = Speed_PID_Compute(&gMotorRightPID, g_base_speed, g_encoder_right.speed_mps, dt);
+                        break;
+                    }
+                    last_lost_ticks = now;
                     lost_count++;
                     oled_post_running(selected_laps, lost_count);
                     if (lost_count >= lost_limit) {
