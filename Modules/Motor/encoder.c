@@ -19,7 +19,9 @@ void GROUP1_IRQHandler(void)
             // 读 B 相判断方向：GPIOA.16
             if (DL_GPIO_readPins(GPIOA, GPIO_Encoder_PIN_Front_Left_B_PIN)) {
                 g_encoder_left.count++;
-            } else {
+            } 
+            else 
+            {
                 g_encoder_left.count--;
             }
             break;
@@ -28,11 +30,13 @@ void GROUP1_IRQHandler(void)
             // 读 B 相判断方向：GPIOA.17
             if (DL_GPIO_readPins(GPIOA, GPIO_Encoder_PIN_Front_Right_B_PIN)) {
                 g_encoder_right.count++;
-            } else {
+            } 
+            else
+            {
                 g_encoder_right.count--;
             }
             break;
-
+            
         default:
             break;
     }

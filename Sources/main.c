@@ -12,7 +12,7 @@
 #include "mpu6050_task.h"
 #include "tracking_task.h"
 #include "motor_task.h"
-#include "oled_software_i2c.h"
+#include "oled_task.h"
 
 static TaskHandle_t printLogTask_handle;
 static TaskHandle_t blinkTask_handle;
@@ -97,6 +97,8 @@ int main()
     // MPU6050_TaskInit();
     // 初始化循迹任务和队列
     Tracking_TaskInit();
+    // 初始化 OLED 任务和队列（必须在 Motor_TaskInit 之前，确保 xOledQueue 先创建）
+    OLED_TaskInit();
     // 初始化电机任务（编码器+PWM+PID）
     Motor_TaskInit();
     vTaskStartScheduler();

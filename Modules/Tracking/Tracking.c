@@ -20,7 +20,8 @@ void Track_ReadSensors(TrackSensorData *data)
     data->L3 = (DL_GPIO_readPins(Tracking_L3_PORT, Tracking_L3_PIN) != 0) ? 1 : 0;
     data->L4 = (DL_GPIO_readPins(Tracking_L4_PORT, Tracking_L4_PIN) != 0) ? 1 : 0;
 
-    data->R1 = (DL_GPIO_readPins(Tracking_R1_PORT, Tracking_R1_PIN) != 0) ? 1 : 0;
+    // data->R1 = (DL_GPIO_readPins(Tracking_R1_PORT, Tracking_R1_PIN) != 0) ? 1 : 0;
+    data->R1 = 0; // R1传感器损坏，暂时固定为0
     data->R2 = (DL_GPIO_readPins(Tracking_R2_PORT, Tracking_R2_PIN) != 0) ? 1 : 0;
     data->R3 = (DL_GPIO_readPins(Tracking_R3_PORT, Tracking_R3_PIN) != 0) ? 1 : 0;
     data->R4 = (DL_GPIO_readPins(Tracking_R4_PORT, Tracking_R4_PIN) != 0) ? 1 : 0;
