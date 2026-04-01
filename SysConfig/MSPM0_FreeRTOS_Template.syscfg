@@ -18,6 +18,7 @@ const GPIO3         = GPIO.addInstance();
 const GPIO4         = GPIO.addInstance();
 const GPIO5         = GPIO.addInstance();
 const GPIO6         = GPIO.addInstance();
+const GPIO7         = GPIO.addInstance();
 const I2C           = scripting.addModule("/ti/driverlib/I2C", {}, false);
 const I2C1          = I2C.addInstance();
 const MATHACL       = scripting.addModule("/ti/driverlib/MATHACL");
@@ -137,7 +138,7 @@ GPIO5.associatedPins[3].$name       = "GPIO_BIN2";
 GPIO5.associatedPins[3].pin.$assign = "boosterpack.11";
 
 GPIO6.$name                              = "GPIO_KEY";
-GPIO6.associatedPins.create(2);
+GPIO6.associatedPins.create(3);
 GPIO6.associatedPins[0].$name            = "KEY_A26";
 GPIO6.associatedPins[0].direction        = "INPUT";
 GPIO6.associatedPins[0].internalResistor = "PULL_UP";
@@ -146,6 +147,17 @@ GPIO6.associatedPins[1].$name            = "KEY_A25";
 GPIO6.associatedPins[1].internalResistor = "PULL_UP";
 GPIO6.associatedPins[1].direction        = "INPUT";
 GPIO6.associatedPins[1].pin.$assign      = "boosterpack.2";
+GPIO6.associatedPins[2].$name            = "KEY_B26";
+GPIO6.associatedPins[2].direction        = "INPUT";
+GPIO6.associatedPins[2].internalResistor = "PULL_UP";
+GPIO6.associatedPins[2].pin.$assign      = "j19_expansion.8";
+
+GPIO7.$name                         = "GPIO_OLED";
+GPIO7.associatedPins.create(2);
+GPIO7.associatedPins[0].$name       = "PIN_OLED_SCL";
+GPIO7.associatedPins[0].pin.$assign = "boosterpack.37";
+GPIO7.associatedPins[1].$name       = "PIN_OLED_SDA";
+GPIO7.associatedPins[1].pin.$assign = "boosterpack.38";
 
 I2C1.$name                             = "I2C_MPU6050";
 I2C1.basicEnableController             = true;

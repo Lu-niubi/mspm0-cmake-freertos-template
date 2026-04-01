@@ -12,6 +12,7 @@
 #include "mpu6050_task.h"
 #include "tracking_task.h"
 #include "motor_task.h"
+#include "oled_software_i2c.h"
 
 static TaskHandle_t printLogTask_handle;
 static TaskHandle_t blinkTask_handle;

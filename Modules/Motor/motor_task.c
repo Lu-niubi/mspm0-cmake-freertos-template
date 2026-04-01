@@ -3,16 +3,17 @@
 #include "encoder.h"
 #include "tracking_task.h"
 #include "button.h"
+#include "oled_software_i2c.h"
 #include "task.h"
 #include "queue.h"
+#include <stdio.h>
 
 QueueHandle_t xMotorSpeedQueue = NULL;
 Speed_PID_Controller gMotorLeftPID;
 Speed_PID_Controller gMotorRightPID;
 
-float g_base_speed = 0.5f;  // 基础目标速度（m/s），可运行时修改
+float g_base_speed = 0.5f;
 
-// 软启动：每个 10ms 周期最多允许 duty 增加的幅度
 #define RAMP_STEP  20.0f
 
 static float ramp_duty(float current, float target)
@@ -23,38 +24,79 @@ static float ramp_duty(float current, float target)
     return target;
 }
 
-// 丢线状态机
+/* 刷新 OLED 选圈界面 */
+static void oled_show_select(uint8_t laps)
+{
+    char buf[16];
+    OLED_Clear();
+    OLED_ShowString(0, 0, (uint8_t *)"Select Laps:", 16);
+    snprintf(buf, sizeof(buf), "  %d  lap(s)", (int)laps);
+    OLED_ShowString(0, 2, (uint8_t *)buf, 16);
+    OLED_ShowString(0, 4, (uint8_t *)"A26+ A25- B26OK", 16);
+}
+
+/* 刷新 OLED 倒计时界面 */
+static void oled_show_countdown(uint8_t laps, uint8_t sec)
+{
+    char buf[16];
+    OLED_ShowString(0, 0, (uint8_t *)"Ready! Start in:", 16);
+    snprintf(buf, sizeof(buf), "  %d lap(s)  %ds", (int)laps, (int)sec);
+    OLED_ShowString(0, 2, (uint8_t *)buf, 16);
+    OLED_ShowString(0, 4, (uint8_t *)"                ", 16);
+}
+
+/* 刷新 OLED 运行界面（显示当前圈数进度） */
+static void oled_show_running(uint8_t laps, uint8_t lost_count)
+{
+    char buf[16];
+    uint8_t corners = lost_count;         // 每次丢线 = 过一个角
+    uint8_t total   = laps * 4;
+    snprintf(buf, sizeof(buf), "Corner %d/%d", (int)corners, (int)total);
+    OLED_ShowString(0, 0, (uint8_t *)"Running...      ", 16);
+    OLED_ShowString(0, 2, (uint8_t *)buf, 16);
+}
+
 typedef enum {
-    MOTOR_STATE_IDLE,           // 等待按键
-    MOTOR_STATE_TRACKING,       // 正常循迹
-    MOTOR_STATE_LOST_STRAIGHT,  // 丢线后直行 0.3 秒
-    MOTOR_STATE_LOST_TURN,      // 直行结束后原地左转（右轮转左轮停）
-    MOTOR_STATE_STOPPED,        // 完成指定圈数，停止
+    MOTOR_STATE_IDLE,
+    MOTOR_STATE_COUNTDOWN,
+    MOTOR_STATE_TRACKING,
+    MOTOR_STATE_LOST_STRAIGHT,
+    MOTOR_STATE_LOST_TURN,
+    MOTOR_STATE_STOPPED,
 } MotorState_t;
 
 void motorTask(void *pvParameters)
 {
     (void)pvParameters;
 
+    /* 在任务上下文中初始化 OLED（内部用 vTaskDelay，必须在任务内） */
+    OLED_Init();
+
+    /* 等 OLED 初始化完成（main 里在任务启动前调用） */
+
     TrackResult track_result;
-    MotorState_t state = MOTOR_STATE_IDLE;
-    uint8_t lost_count    = 0;   // 累计丢线次数
-    uint8_t lost_limit    = 4;   // 触发停止的丢线次数（1圈=4，2圈=8）
-    uint32_t state_ticks  = 0;   // 进入当前状态时的 tick
+    MotorState_t state     = MOTOR_STATE_IDLE;
+    uint8_t lost_count     = 0;
+    uint8_t lost_limit     = 4;    /* 1圈=4 */
+    uint8_t selected_laps  = 1;    /* 默认1圈 */
+    uint32_t state_ticks   = 0;
     const float dt = 0.01f;
 
-    // 软启动当前输出值
     float out_l = 0.0f;
     float out_r = 0.0f;
 
+    /* 先显示选圈界面 */
+    oled_show_select(selected_laps);
+
     TickType_t xLastWakeTime = xTaskGetTickCount();
-    const TickType_t xFrequency = pdMS_TO_TICKS(10);
+    const TickType_t xFrequency = pdMS_TO_TICKS(20); /* 20ms 周期兼做消抖 */
 
     while (1)
     {
+        ButtonEvent_t btn = Button_Scan();
+
         Encoder_UpdateSpeed();
 
-        // 读最新循迹数据（非阻塞）
         bool track_valid = (xQueuePeek(xTrackResultQueue, &track_result, 0) == pdTRUE);
         bool line_found  = track_valid && (track_result.state != TRACK_LOST);
 
@@ -63,29 +105,65 @@ void motorTask(void *pvParameters)
 
         switch (state)
         {
+            /* ---- 选圈界面 ---- */
             case MOTOR_STATE_IDLE:
             {
-                // 等待按键：A26 = 1圈，A25 = 2圈
                 Motor_Stop();
                 out_l = 0.0f;
                 out_r = 0.0f;
-                if (Button_A26_Pressed()) {
-                    lost_count = 0;
-                    lost_limit = 4;
-                    state = MOTOR_STATE_TRACKING;
-                } else if (Button_A25_Pressed()) {
-                    lost_count = 0;
-                    lost_limit = 8;
-                    state = MOTOR_STATE_TRACKING;
+
+                bool need_refresh = false;
+                if (btn.a26_edge) {
+                    selected_laps++;
+                    if (selected_laps > 9) selected_laps = 1;
+                    need_refresh = true;
+                }
+                if (btn.a25_edge) {
+                    if (selected_laps > 1) selected_laps--;
+                    need_refresh = true;
+                }
+                if (need_refresh) {
+                    oled_show_select(selected_laps);
+                }
+
+                if (btn.b26_edge) {
+                    /* 确认圈数，进入倒计时 */
+                    lost_limit  = selected_laps * 4;
+                    lost_count  = 0;
+                    state       = MOTOR_STATE_COUNTDOWN;
+                    state_ticks = xTaskGetTickCount();
+                    oled_show_countdown(selected_laps, 3);
                 }
                 goto skip_output;
             }
 
+            /* ---- 3秒倒计时 ---- */
+            case MOTOR_STATE_COUNTDOWN:
+            {
+                Motor_Stop();
+                out_l = 0.0f;
+                out_r = 0.0f;
+
+                uint32_t elapsed = xTaskGetTickCount() - state_ticks;
+                if (elapsed >= pdMS_TO_TICKS(3000)) {
+                    /* 倒计时结束，开始循迹 */
+                    OLED_Clear();
+                    oled_show_running(selected_laps, lost_count);
+                    state = MOTOR_STATE_TRACKING;
+                } else {
+                    /* 每秒刷新一次倒计时数字 */
+                    uint8_t sec_left = 3 - (uint8_t)(elapsed / pdMS_TO_TICKS(1000));
+                    oled_show_countdown(selected_laps, sec_left);
+                }
+                goto skip_output;
+            }
+
+            /* ---- 正常循迹 ---- */
             case MOTOR_STATE_TRACKING:
             {
                 if (!line_found) {
-                    // 刚丢线
                     lost_count++;
+                    oled_show_running(selected_laps, lost_count);
                     if (lost_count >= lost_limit) {
                         state = MOTOR_STATE_STOPPED;
                     } else {
@@ -95,7 +173,6 @@ void motorTask(void *pvParameters)
                     break;
                 }
 
-                // 正常循迹：转向 PID 叠加基础速度
                 float steering_output = Steering_PID_Compute(
                     &gSteeringPID, 0.0f, track_result.track_error, dt);
 
@@ -105,17 +182,16 @@ void motorTask(void *pvParameters)
                 float pid_l = Speed_PID_Compute(&gMotorLeftPID,  target_l, g_encoder_left.speed_mps,  dt);
                 float pid_r = Speed_PID_Compute(&gMotorRightPID, target_r, g_encoder_right.speed_mps, dt);
 
-                // 软启动限速
                 duty_l = ramp_duty(out_l, pid_l);
                 duty_r = ramp_duty(out_r, pid_r);
                 break;
             }
 
+            /* ---- 丢线后直行 0.3 秒 ---- */
             case MOTOR_STATE_LOST_STRAIGHT:
             {
-                // 直行 2.5 秒
                 uint32_t elapsed = xTaskGetTickCount() - state_ticks;
-                if (elapsed >= pdMS_TO_TICKS(300)) {
+                if (elapsed >= pdMS_TO_TICKS(100)) {
                     state = MOTOR_STATE_LOST_TURN;
                     state_ticks = xTaskGetTickCount();
                     break;
@@ -128,31 +204,34 @@ void motorTask(void *pvParameters)
                 break;
             }
 
+            /* ---- 原地左转（右轮转，左轮停）直到找线 ---- */
             case MOTOR_STATE_LOST_TURN:
             {
                 if (line_found) {
-                    // 找到线，恢复循迹
                     state = MOTOR_STATE_TRACKING;
                     break;
                 }
-                // 原地左转：右轮正转，左轮停
                 out_l = 0.0f;
                 Motor_SetPWM(0, 0.0f);
 
                 float pid_r = Speed_PID_Compute(&gMotorRightPID, g_base_speed, g_encoder_right.speed_mps, dt);
                 out_r = ramp_duty(out_r, pid_r);
                 Motor_SetPWM(1, out_r);
-
                 goto skip_output;
             }
 
+            /* ---- 完成指定圈数，停止 ---- */
             case MOTOR_STATE_STOPPED:
             default:
                 Motor_Stop();
                 out_l = 0.0f;
                 out_r = 0.0f;
-                // 等待再次按键重新出发
+                OLED_Clear();
+                OLED_ShowString(0, 0, (uint8_t *)"Done!           ", 16);
+                OLED_ShowString(0, 2, (uint8_t *)"Press B26 again ", 16);
+                /* 等待 B26 再次确认重置 */
                 state = MOTOR_STATE_IDLE;
+                oled_show_select(selected_laps);
                 goto skip_output;
         }
 
@@ -183,6 +262,6 @@ void Motor_TaskInit(void)
 
     xMotorSpeedQueue = xQueueCreate(1, sizeof(MotorSpeed_t));
 
-    xTaskCreate(motorTask, "motorTask", 0x200, NULL,
+    xTaskCreate(motorTask, "motorTask", 0x300, NULL,
                 configMAX_PRIORITIES - 2, NULL);
 }

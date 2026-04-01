@@ -219,15 +219,27 @@ extern "C" {
 #define GPIO_IN_GPIO_BIN2_PORT                                           (GPIOB)
 #define GPIO_IN_GPIO_BIN2_PIN                                   (DL_GPIO_PIN_16)
 #define GPIO_IN_GPIO_BIN2_IOMUX                                  (IOMUX_PINCM33)
-/* Port definition for Pin Group GPIO_KEY */
-#define GPIO_KEY_PORT                                                    (GPIOA)
-
 /* Defines for KEY_A26: GPIOA.26 with pinCMx 59 on package pin 30 */
+#define GPIO_KEY_KEY_A26_PORT                                            (GPIOA)
 #define GPIO_KEY_KEY_A26_PIN                                    (DL_GPIO_PIN_26)
 #define GPIO_KEY_KEY_A26_IOMUX                                   (IOMUX_PINCM59)
 /* Defines for KEY_A25: GPIOA.25 with pinCMx 55 on package pin 26 */
+#define GPIO_KEY_KEY_A25_PORT                                            (GPIOA)
 #define GPIO_KEY_KEY_A25_PIN                                    (DL_GPIO_PIN_25)
 #define GPIO_KEY_KEY_A25_IOMUX                                   (IOMUX_PINCM55)
+/* Defines for KEY_B26: GPIOB.26 with pinCMx 57 on package pin 28 */
+#define GPIO_KEY_KEY_B26_PORT                                            (GPIOB)
+#define GPIO_KEY_KEY_B26_PIN                                    (DL_GPIO_PIN_26)
+#define GPIO_KEY_KEY_B26_IOMUX                                   (IOMUX_PINCM57)
+/* Port definition for Pin Group GPIO_OLED */
+#define GPIO_OLED_PORT                                                   (GPIOA)
+
+/* Defines for PIN_OLED_SCL: GPIOA.31 with pinCMx 6 on package pin 39 */
+#define GPIO_OLED_PIN_OLED_SCL_PIN                              (DL_GPIO_PIN_31)
+#define GPIO_OLED_PIN_OLED_SCL_IOMUX                              (IOMUX_PINCM6)
+/* Defines for PIN_OLED_SDA: GPIOA.28 with pinCMx 3 on package pin 35 */
+#define GPIO_OLED_PIN_OLED_SDA_PIN                              (DL_GPIO_PIN_28)
+#define GPIO_OLED_PIN_OLED_SDA_IOMUX                              (IOMUX_PINCM3)
 
 
 

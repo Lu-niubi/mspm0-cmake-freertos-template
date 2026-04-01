@@ -14,6 +14,7 @@ include_directories(
     ./Modules/PID
     ./Modules/Motor
     ./Modules/Button
+    ./Modules/OLED
 )
 
 file(GLOB_RECURSE C_SOURCES "./Sources/*.c")
