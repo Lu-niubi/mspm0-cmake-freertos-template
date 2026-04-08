@@ -13,6 +13,7 @@
 #include "tracking_task.h"
 #include "motor_task.h"
 #include "oled_task.h"
+#include "gimbal_task.h"
 
 static TaskHandle_t printLogTask_handle;
 static TaskHandle_t blinkTask_handle;
@@ -101,5 +102,7 @@ int main()
     OLED_TaskInit();
     // 初始化电机任务（编码器+PWM+PID）
     Motor_TaskInit();
+    // 初始化云台任务（步进电机控制+上位机串口接收）
+    Gimbal_TaskInit();
     vTaskStartScheduler();
 }

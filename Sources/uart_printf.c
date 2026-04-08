@@ -12,9 +12,9 @@ int uart_printf(const char *fmt, ...)
     i=0;
     while(i<len)
     {
-        DL_UART_transmitData(UART0_INST,buf[i]);
+        DL_UART_transmitData(UART_2_INST,buf[i]);
         // 等待FIFO清空再输出
-        while(!DL_UART_isTXFIFOEmpty(UART0));
+        while(!DL_UART_isTXFIFOEmpty(UART_2_INST));
         i++;
     }
     return len;
